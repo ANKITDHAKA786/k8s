@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-manager-eks-demo-frontend
+spec:
+  selector:
+    matchLabels:
+      app: node-manager-eks-demo-frontend
+  template:
+    metadata:
+      labels:
+        app: node-manager-eks-demo-frontend
+    spec:
+      containers:
+        - name: node-manager-eks-demo-frontend
+          image: registry.gitlab.com/edgevana/blockchain-node-manager/frontend/frontend-demo:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-manager-eks-demo-frontend
+  namespace: default
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: alb
+    service.beta.kubernetes.io/aws-load-balancer-alb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+  type: ClusterIP
+  selector:
+    app: node-manager-eks-demo-frontend
